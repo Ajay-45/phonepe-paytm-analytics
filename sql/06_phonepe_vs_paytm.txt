@@ -1,0 +1,23 @@
+SELECT
+  application_name,
+
+  SUM(SAFE_CAST(total_volume_mn AS FLOAT64)) AS total_volume_mn,
+
+  SUM(SAFE_CAST(total_value_cr AS FLOAT64)) AS total_value_cr,
+
+  ROUND(
+    SAFE_DIVIDE(
+      SUM(SAFE_CAST(total_value_cr AS FLOAT64)),
+      SUM(SAFE_CAST(total_volume_mn AS FLOAT64))
+    ),
+    2
+  ) AS average_transaction_value
+
+FROM `phonepe-paytm-analytics.phonepe_paytm.upi_apps_historical_2022_2026`
+
+WHERE LOWER(application_name) LIKE '%phonepe%'
+   OR LOWER(application_name) = 'paytm'
+
+GROUP BY application_name
+
+ORDER BY total_volume_mn DESC;

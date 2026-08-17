@@ -1,0 +1,37 @@
+WITH comparison AS (
+  SELECT
+    MAX(CASE
+      WHEN LOWER(application_name) = 'phone pe'
+      THEN total_volume_mn
+    END) AS phonepe_volume_mn,
+
+    MAX(CASE
+      WHEN LOWER(application_name) = 'paytm'
+      THEN total_volume_mn
+    END) AS paytm_volume_mn,
+
+    MAX(CASE
+      WHEN LOWER(application_name) = 'phone pe'
+      THEN total_value_cr
+    END) AS phonepe_value_cr,
+
+    MAX(CASE
+      WHEN LOWER(application_name) = 'paytm'
+      THEN total_value_cr
+    END) AS paytm_value_cr
+
+  FROM `phonepe-paytm-analytics.phonepe_paytm.upi_apps_july_2026`
+)
+
+SELECT
+  phonepe_volume_mn,
+  paytm_volume_mn,
+  phonepe_volume_mn - paytm_volume_mn AS volume_gap_mn,
+  ROUND(SAFE_DIVIDE(phonepe_volume_mn, paytm_volume_mn), 2) AS phonepe_volume_multiple,
+
+  phonepe_value_cr,
+  paytm_value_cr,
+  phonepe_value_cr - paytm_value_cr AS value_gap_cr,
+  ROUND(SAFE_DIVIDE(phonepe_value_cr, paytm_value_cr), 2) AS phonepe_value_multiple
+
+FROM comparison;

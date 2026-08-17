@@ -1,0 +1,32 @@
+WITH cleaned_apps AS (
+  SELECT
+    CASE
+      WHEN LOWER(application_name) LIKE '%phonepe%'
+        OR LOWER(application_name) LIKE '%phone pe%'
+        THEN 'PhonePe'
+
+      WHEN LOWER(application_name) LIKE '%google pay%'
+        THEN 'Google Pay'
+
+      WHEN LOWER(application_name) = 'paytm'
+        THEN 'Paytm'
+
+      ELSE TRIM(REGEXP_REPLACE(application_name, r'\s*#\s*$', ''))
+    END AS application_name,
+
+    SAFE_CAST(total_volume_mn AS FLOAT64) AS total_volume_mn
+
+  FROM `phonepe-paytm-analytics.phonepe_paytm.upi_apps_historical_2022_2026`
+
+  WHERE application_name IS NOT NULL
+)
+
+SELECT
+  application_name,
+  SUM(total_volume_mn) AS total_transaction_volume_mn
+
+FROM cleaned_apps
+
+GROUP BY application_name
+
+ORDER BY total_transaction_volume_mn DESC;

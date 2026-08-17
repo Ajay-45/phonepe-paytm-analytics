@@ -1,0 +1,37 @@
+WITH app_value AS (
+  SELECT
+    CASE
+      WHEN LOWER(application_name) LIKE '%phonepe%' THEN 'PhonePe'
+      WHEN LOWER(application_name) LIKE '%google pay%' THEN 'Google Pay'
+      WHEN LOWER(application_name) = 'paytm' THEN 'Paytm'
+      ELSE TRIM(REGEXP_REPLACE(application_name, r'\s*#\s*$', ''))
+    END AS application_name,
+
+    SUM(SAFE_CAST(total_value_cr AS FLOAT64)) AS total_value_cr
+
+  FROM `phonepe-paytm-analytics.phonepe_paytm.upi_apps_historical_2022_2026`
+
+  WHERE application_name IS NOT NULL
+
+  GROUP BY application_name
+),
+
+market AS (
+  SELECT
+    SUM(total_value_cr) AS total_market_value
+  FROM app_value
+)
+
+SELECT
+  a.application_name,
+  a.total_value_cr,
+
+  ROUND(
+    SAFE_DIVIDE(a.total_value_cr, market.total_market_value) * 100,
+    2
+  ) AS value_market_share_pct
+
+FROM app_value AS a
+CROSS JOIN market
+
+ORDER BY value_market_share_pct DESC;

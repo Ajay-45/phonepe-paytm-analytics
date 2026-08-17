@@ -1,0 +1,17 @@
+SELECT
+  CASE
+    WHEN LOWER(application_name) LIKE '%phonepe%' THEN 'PhonePe'
+    WHEN LOWER(application_name) LIKE '%google pay%' THEN 'Google Pay'
+    WHEN LOWER(application_name) = 'paytm' THEN 'Paytm'
+    ELSE TRIM(REGEXP_REPLACE(application_name, r'\s*#\s*$', ''))
+  END AS application_name,
+
+  SUM(SAFE_CAST(total_value_cr AS FLOAT64)) AS total_transaction_value_cr
+
+FROM `phonepe-paytm-analytics.phonepe_paytm.upi_apps_historical_2022_2026`
+
+WHERE application_name IS NOT NULL
+
+GROUP BY application_name
+
+ORDER BY total_transaction_value_cr DESC;
